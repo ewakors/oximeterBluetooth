@@ -1,51 +1,62 @@
 //
-//  ViewController.swift
+//  ThermometerViewController.swift
 //  TestBluetooth
 //
-//  Created by goapps on 10/05/2019.
+//  Created by goapps on 17/05/2019.
 //  Copyright © 2019 pl.goapps. All rights reserved.
 //
 
 import UIKit
 import CoreBluetooth
 
-class ViewController: UIViewController {
-    
-    var fingerServiceId = "0000ffb0-0000-1000-8000-00805f9b34fb"
-    var fingerCharacteriscticId = "0000ffb2-0000-1000-8000-00805f9b34fb"
-    var fingerCharacteriscticDescriptorId = "00002902-0000-1000-8000-00805f9b34fb"
-    
+class ThermometerViewController: UIViewController {
+
     let temperatureServiceId = "cdeacb80-5235-4c07-8846-93a37ee6b86d"
-    
-    let glucoseServiceId = "00001808-0000-1000-8000-00805f9b34fb"
-    let glucoseCharacteristicId = "00002a18-0000-1000-8000-00805f9b34fb"
-    let glucoseCharacteristicDescriptorId = "00002902-0000-1000-8000-00805f9b34fb"
+    let temperatureCharacteristicNotifyId = "cdeacb81-5235-4c07-8846-93a37ee6b86d"
+    let temperatureCharacteristicWriteId = "cdeacb82-5235-4c07-8846-93a37ee6b86d"
     
     var centralManager: CBCentralManager!
-    var fingerPeriferial: CBPeripheral!
+    var termPeriferial: CBPeripheral!
     
     var rxCharacteristic : CBCharacteristic?
-    var txCharacteristic : CBCharacteristic?
     
     var characteristicASCIIValue = NSString()
     
-    let writeValue = 0xAA550F038401E0 as Int64
-    
-    @IBOutlet weak var spo2Label: UILabel!
-    @IBOutlet weak var bpmLabel: UILabel!
-    @IBOutlet weak var piLabel: UILabel!
+    @IBOutlet weak var tempLabel: UILabel!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         centralManager = CBCentralManager(delegate: self, queue: nil)
+//        let first = 15
+//        var binary = String(first,radix: 2)
+//        if binary.count < 8 {
+//            let count = 8 - binary.count
+//            for i in 0..<count {
+//                binary = "0" + binary
+//            }
+//        }
+//        let second = 82
+//        var binary2 = String(second,radix: 2)
+//        if binary2.count < 8 {
+//            let count = 8 - binary2.count
+//            for i in 0..<count {
+//                binary2 = "0" + binary2
+//            }
+//        }
+//        print("binary \(binary)")
+//        print("binary2 \(binary2)")
+//        print(binary + binary2)
+//        let decimal = Int(binary+binary2, radix:2)!
+//        let temp = Float(decimal)
+//        print(decimal)
+//        print(temp / 100)
     }
+    
     @IBAction func refreshButton(_ sender: Any) {
         centralManager = CBCentralManager(delegate: self, queue: nil)
     }
 }
-
-extension ViewController: CBCentralManagerDelegate {
-    
+extension ThermometerViewController: CBCentralManagerDelegate {
     // shows bluettoth state
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
         switch central.state {
@@ -63,11 +74,10 @@ extension ViewController: CBCentralManagerDelegate {
             print("central.state is .poweredOn")
             
             // set to discover devices only with this service id
-            let fingerRateServiceUUId = CBUUID(string: fingerServiceId)
-            let temperatureServiceUUID = CBUUID(string: temperatureServiceId)
-            let glucoseServiceUUID = CBUUID(string: glucoseServiceId)
-            centralManager.scanForPeripherals(withServices: [fingerRateServiceUUId])
-            
+        let glucoseServiceUUID = CBUUID(string: temperatureServiceId)
+        centralManager.scanForPeripherals(withServices: [glucoseServiceUUID])
+        @unknown default:
+            fatalError()
         }
     }
     
@@ -76,19 +86,19 @@ extension ViewController: CBCentralManagerDelegate {
         
         //shows nerby devics
         print(peripheral)
-        fingerPeriferial = peripheral
-        fingerPeriferial.delegate = self
+        termPeriferial = peripheral
+        termPeriferial.delegate = self
         centralManager.stopScan()
-        centralManager.connect(fingerPeriferial)
+        centralManager.connect(termPeriferial)
     }
     
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
-        print("connected to finger")
-        fingerPeriferial.discoverServices(nil)
+        print("connected to thermometer")
+        termPeriferial.discoverServices(nil)
     }
 }
 
-extension ViewController: CBPeripheralDelegate {
+extension ThermometerViewController: CBPeripheralDelegate {
     
     //obtain all services
     func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
@@ -109,30 +119,24 @@ extension ViewController: CBPeripheralDelegate {
         }
         
         guard let characteristics = service.characteristics else { return }
-        let fingerCharacteristicUUID = CBUUID(string: "0000ffb2-0000-1000-8000-00805f9b34fb")
-        let glucoseCharacteristicUUId = CBUUID(string: glucoseCharacteristicId)
+        
+        let temperatureCharacteristicNotifyUUID = CBUUID(string: temperatureCharacteristicNotifyId)
+        let temperatureCharacteristicWriteUUID = CBUUID(string: temperatureCharacteristicWriteId)
+        
         for characteristic in characteristics {
             print(characteristic)
-            //uuid: FFB0, propertis: Write without response, notify
-            if characteristic.uuid == fingerCharacteristicUUID || characteristic.uuid == glucoseCharacteristicUUId{
-                
+            
+            if characteristic.uuid == temperatureCharacteristicNotifyUUID {
                 rxCharacteristic =  characteristic
-                //send value _command_para_on Data(bytes: [-86, 85, 15, 3, -124, 1, -32]) 0xAA550F038401E0 [0xAA, 0x55, 0x0F, 0x03, 0x84, 0x01, 0xE0]
-                //send value _command_wave_on Data(bytes: [-86, 85, 15, 3, -123, 1, 36]) 0xAA550F038401E0 [0xAA, 0x55, 0x0F, 0x03, 0x85, 0x01, 0x24]
-                peripheral.writeValue(Data([0xAA, 0x55, 0x0F, 0x03, 0x84, 0x01, 0xE0]), for: characteristic, type: .withoutResponse)
-//                peripheral.writeValue(Data([0xAA, 0x55, 0x0F, 0x03, 0x85, 0x01, 0x24]), for: characteristic, type: .withoutResponse)
-                
                 peripheral.setNotifyValue(true, for: characteristic)
-                
-                print("fantastish \(characteristic)")
-                print("Rx characteristic: \(characteristic.uuid)")
-                
-                //descritors
                 peripheral.discoverDescriptors(for: characteristic)
-            } else {
-                // Device information
-                peripheral.readValue(for: characteristic)
             }
+            
+            if characteristic.uuid == temperatureCharacteristicWriteUUID {
+                peripheral.writeValue(Data([0xAA, 0x22, 0x02, 0x80, 0x01, 0x00, 0x81]), for: characteristic, type: .withResponse)
+                peripheral.discoverDescriptors(for: characteristic)
+            }
+//                peripheral.readValue(for: characteristic)
         }
     }
     
@@ -141,7 +145,7 @@ extension ViewController: CBPeripheralDelegate {
             print("Failed… error: \(error)")
             return
         }
-        
+//00001010 10001001
         print("characteristic uuid: \(characteristic))")
         
         if characteristic.value != nil {
@@ -150,7 +154,7 @@ extension ViewController: CBPeripheralDelegate {
                 print("Value Recieved: \((characteristicASCIIValue as String))")
                 NotificationCenter.default.post(name:NSNotification.Name(rawValue: "Notify"), object: nil)
             } else {
-                oximeterSpO2ConvertValue(from: characteristic)
+                temperatureConvertValue(from: characteristic)
             }
         }
     }
@@ -169,7 +173,6 @@ extension ViewController: CBPeripheralDelegate {
                 peripheral.readValue(for: descript!)
                 print("function name: DidDiscoverDescriptorForChar \(String(describing: descript))")
                 print("Rx Value \(String(describing: rxCharacteristic?.value))")
-                print("Tx Value \(String(describing: txCharacteristic?.value))")
             }
         }
     }
@@ -198,7 +201,7 @@ extension ViewController: CBPeripheralDelegate {
             print("Error didWriteValueFor characteristic discovering services: \(error.debugDescription)")
             return
         }
-        print("Message sent")
+        print("Message sent \(characteristic)")
     }
     
     func peripheral(_ peripheral: CBPeripheral, didWriteValueFor descriptor: CBDescriptor, error: Error?) {
@@ -222,21 +225,42 @@ extension ViewController: CBPeripheralDelegate {
         }
     }
     
-    private func oximeterSpO2ConvertValue(from characteristic: CBCharacteristic) {
-        //guard let characteristicData = characteristic.value else { print("oximeter converter error") }
+    private func temperatureConvertValue(from characteristic: CBCharacteristic) {
         if let characteristicData = characteristic.value {
             let byteArray = [UInt8](characteristicData)
-            // The SpO2 is in the 6 bytes, i.e. aa550f08 01603e00 0d00c063 => x60 in Hexadecimal = 96 decimal
-            // The BPM (beat per minute) is in the 7 bytes, i.e. aa550f08 01603e00 0d00c063 => x3e in Hexadecimal = 62 decimal
-            //  PI (Perfusion Index) is in the 9 bytes, i.e. aa550f08 01603e00 0d00c063 => x0d in Hexadecimal = 13 decimal => 1,3%
+ 
             let firstBitValue = byteArray[0] & 0x01
             if firstBitValue == 0 {
-                let spo2Value = Int(byteArray[5])
-                spo2Label.text = "SpO2: \(spo2Value)"
-                let bpmValue = Int(byteArray[6])
-                bpmLabel.text = "BPM: \(bpmValue)"
-                let piValue = Float(byteArray[8]) / 10
-                piLabel.text = "PI (%): \(piValue)"
+                // temp in Celsius
+                let first = Int(byteArray[2])
+                var binary = String(first,radix: 2)
+                if binary.count < 8 {
+                    let count = 8 - binary.count
+                    for i in 0..<count {
+                        binary = "0" + binary
+                    }
+                }
+                let second = Int(byteArray[3])
+                var binary2 = String(second,radix: 2)
+                if binary2.count < 8 {
+                    let count = 8 - binary2.count
+                    for i in 0..<count {
+                        binary2 = "0" + binary2
+                    }
+                }
+                print("binary \(binary)")
+                print("binary2 \(binary2)")
+                print(binary + binary2)
+                let decimal = Int(binary+binary2, radix:2)!
+                let temp = Float(decimal)
+                let numberOfPlaces = 1.0
+                let multiplier = pow(10.0, numberOfPlaces)
+                let num = 10.12345
+                let rounded = round(num * multiplier) / multiplier
+                print(decimal)
+                print(temp / 100)
+                tempLabel.text = "Temperature: \(temp/100)"
+               
             }
         }
     }
