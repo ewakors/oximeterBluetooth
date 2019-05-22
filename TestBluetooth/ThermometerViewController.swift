@@ -23,6 +23,7 @@ class ThermometerViewController: UIViewController {
     var characteristicASCIIValue = NSString()
     
     @IBOutlet weak var tempLabel: UILabel!
+     @IBOutlet weak var tempFarLabel: UILabel!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -50,6 +51,9 @@ class ThermometerViewController: UIViewController {
 //        let temp = Float(decimal)
 //        print(decimal)
 //        print(temp / 100)
+        let rounded = 31.5
+        let tempFar = (9/5) * rounded + 32
+        print(tempFar)
     }
     
     @IBAction func refreshButton(_ sender: Any) {
@@ -105,9 +109,6 @@ extension ThermometerViewController: CBPeripheralDelegate {
         
         guard let services = peripheral.services else { return }
         for serivce in services {
-            //            print("ere")
-            //            print(serivce)
-            
             peripheral.discoverCharacteristics(nil, for: serivce)
         }
     }
@@ -145,7 +146,7 @@ extension ThermometerViewController: CBPeripheralDelegate {
             print("Failed… error: \(error)")
             return
         }
-//00001010 10001001
+
         print("characteristic uuid: \(characteristic))")
         
         if characteristic.value != nil {
@@ -232,16 +233,14 @@ extension ThermometerViewController: CBPeripheralDelegate {
             let firstBitValue = byteArray[0] & 0x01
             if firstBitValue == 0 {
                 // temp in Celsius
-                let first = Int(byteArray[2])
-                var binary = String(first,radix: 2)
+                var binary = String(Int(byteArray[2]),radix: 2)
                 if binary.count < 8 {
                     let count = 8 - binary.count
                     for i in 0..<count {
                         binary = "0" + binary
                     }
                 }
-                let second = Int(byteArray[3])
-                var binary2 = String(second,radix: 2)
+                var binary2 = String(Int(byteArray[3]),radix: 2)
                 if binary2.count < 8 {
                     let count = 8 - binary2.count
                     for i in 0..<count {
@@ -250,18 +249,23 @@ extension ThermometerViewController: CBPeripheralDelegate {
                 }
                 print("binary \(binary)")
                 print("binary2 \(binary2)")
+        
                 print(binary + binary2)
                 let decimal = Int(binary+binary2, radix:2)!
-                let temp = Float(decimal)
-                let numberOfPlaces = 1.0
-                let multiplier = pow(10.0, numberOfPlaces)
-                let num = 10.12345
-                let rounded = round(num * multiplier) / multiplier
+                let temp = Double(decimal) / 100
                 print(decimal)
-                print(temp / 100)
-                tempLabel.text = "Temperature: \(temp/100)"
-               
+                print(temp)
+                tempLabel.text = "\(roundedValue(value: temp)) °C"
+                //temp in Fahrenheit
+                let tempFar = (9/5) * temp + 32
+                tempFarLabel.text = "\(roundedValue(value: tempFar)) °F"
             }
         }
+    }
+    
+    func roundedValue(value: Double) -> Double{
+        let multiplier = pow(10.0, 1.0)
+        let rounded = round((value) * multiplier) / multiplier
+        return rounded
     }
 }
