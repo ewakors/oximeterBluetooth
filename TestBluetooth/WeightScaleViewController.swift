@@ -1,40 +1,43 @@
 //
-//  ThermometerViewController.swift
+//  WeightScaleViewController.swift
 //  TestBluetooth
 //
-//  Created by goapps on 17/05/2019.
+//  Created by goapps on 22/05/2019.
 //  Copyright © 2019 pl.goapps. All rights reserved.
 //
 
 import UIKit
 import CoreBluetooth
 
-class ThermometerViewController: UIViewController {
+class WeightScaleViewController: UIViewController {
 
-    let temperatureServiceId = "cdeacb80-5235-4c07-8846-93a37ee6b86d"
-    let temperatureCharacteristicNotifyId = "cdeacb81-5235-4c07-8846-93a37ee6b86d"
-    let temperatureCharacteristicWriteId = "cdeacb82-5235-4c07-8846-93a37ee6b86d"
+    let weightServiceId = "0000fee7-0000-1000-8000-00805f9b34fb"
+    let weightIndicateCharacteristicId = "0000fec8-0000-1000-8000-00805f9b34fb"
+    let weightCharacteristicDescriptorId = "00002902-0000-1000-8000-00805f9b34fb"
     
     var centralManager: CBCentralManager!
-    var termPeriferial: CBPeripheral!
+    var scalePeriferial: CBPeripheral!
     
     var rxCharacteristic : CBCharacteristic?
     
     var characteristicASCIIValue = NSString()
     
-    @IBOutlet weak var tempLabel: UILabel!
-    @IBOutlet weak var tempFarLabel: UILabel!
+    @IBOutlet weak var weightLabel: UILabel!
+
     
     override func viewDidLoad() {
         super.viewDidLoad()
         centralManager = CBCentralManager(delegate: self, queue: nil)
+    }
+    override func viewDidDisappear(_ animated: Bool) {
+        centralManager = nil
     }
     
     @IBAction func refreshButton(_ sender: Any) {
         centralManager = CBCentralManager(delegate: self, queue: nil)
     }
 }
-extension ThermometerViewController: CBCentralManagerDelegate {
+extension WeightScaleViewController: CBCentralManagerDelegate {
     // shows bluettoth state
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
         switch central.state {
@@ -52,8 +55,8 @@ extension ThermometerViewController: CBCentralManagerDelegate {
             print("central.state is .poweredOn")
             
             // set to discover devices only with this service id
-        let glucoseServiceUUID = CBUUID(string: temperatureServiceId)
-        centralManager.scanForPeripherals(withServices: [glucoseServiceUUID])
+        let weightServiceUUID = CBUUID(string: weightServiceId)
+        centralManager.scanForPeripherals(withServices: [weightServiceUUID])
         @unknown default:
             fatalError()
         }
@@ -64,25 +67,84 @@ extension ThermometerViewController: CBCentralManagerDelegate {
         
         //shows nerby devics
         print(peripheral)
-        termPeriferial = peripheral
-        termPeriferial.delegate = self
+        print("advertisementData: \(advertisementData)")
+//        var weight: String = String(describing: advertisementData["kCBAdvDataManufacturerData"])
+//        weight = weight.replacingOccurrences(of: "<", with: "")
+//        weight = weight.replacingOccurrences(of: ">", with: "")
+//        print("weight: \(weight)")
+   
+        if let weight = advertisementData["kCBAdvDataManufacturerData"] as? Data {
+            let byteArray = [UInt8](weight)
+                        let firstBitValue = byteArray[0] & 0x01
+                        if firstBitValue == 0 {
+                            var w1 = String(Int(byteArray[5]),radix: 2)
+                            var w2 = String(Int(byteArray[6]),radix: 2)
+                            if w1.count < 8 {
+                                let count = 8 - w1.count
+                                for i in 0..<count {
+                                    w1 = "0" + w1
+                                }
+                            }
+                            if w2.count < 8 {
+                                let count = 8 - w2.count
+                                for i in 0..<count {
+                                    w2 = "0" + w2
+                                }
+                            }
+                            print(w1)
+                            print(w2)
+                            
+                            var decimal: Int = 0
+                            
+                            if w2 != "00000000" {
+                                decimal = Int(w1+w2, radix:2)!
+                            } else {
+                                decimal = Int(w1, radix:2)!
+                            }
+    
+                            var weightKg = Double(decimal)
+                            if decimal < 10000 {
+                                weightKg = weightKg / 100
+                            }
+                            
+                            if decimal >= 10000  {
+                                weightKg = weightKg / 1000
+                            }
+                            
+                            print(decimal)
+                            print("weight: \(weightKg)")
+                            weightKg = weightKg / 2.2046
+                            weightLabel.text = "weight: \(roundedValue(value: weightKg)) kg"
+                        }
+        }
+
+        
+        scalePeriferial = peripheral
+        scalePeriferial.delegate = self
         centralManager.stopScan()
-        centralManager.connect(termPeriferial)
+        centralManager.connect(scalePeriferial)
     }
     
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
-        print("connected to thermometer")
-        termPeriferial.discoverServices(nil)
+        print("connected to weight scale")
+//        scalePeriferial.discoverServices(nil)
+    }
+    
+    func roundedValue(value: Double) -> Double {
+        let multiplier = pow(10.0, 1.0)
+        let rounded = round((value) * multiplier) / multiplier
+        return rounded
     }
 }
 
-extension ThermometerViewController: CBPeripheralDelegate {
+extension WeightScaleViewController: CBPeripheralDelegate {
     
     //obtain all services
     func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
         
         guard let services = peripheral.services else { return }
         for serivce in services {
+            print("service: \(serivce)")
             peripheral.discoverCharacteristics(nil, for: serivce)
         }
     }
@@ -95,23 +157,27 @@ extension ThermometerViewController: CBPeripheralDelegate {
         
         guard let characteristics = service.characteristics else { return }
         
-        let temperatureCharacteristicNotifyUUID = CBUUID(string: temperatureCharacteristicNotifyId)
-        let temperatureCharacteristicWriteUUID = CBUUID(string: temperatureCharacteristicWriteId)
+        let weightCharacteristicUUID = CBUUID(string: weightIndicateCharacteristicId)
         
         for characteristic in characteristics {
             print(characteristic)
             
-            if characteristic.uuid == temperatureCharacteristicNotifyUUID {
+            if characteristic.uuid == weightCharacteristicUUID {
                 rxCharacteristic =  characteristic
-                peripheral.setNotifyValue(true, for: characteristic)
+                peripheral.setNotifyValue(true, for: rxCharacteristic!)
+                peripheral.readValue(for: characteristic)
                 peripheral.discoverDescriptors(for: characteristic)
+
             }
             
-            if characteristic.uuid == temperatureCharacteristicWriteUUID {
-                peripheral.writeValue(Data([0xAA, 0x22, 0x02, 0x80, 0x01, 0x00, 0x81]), for: characteristic, type: .withResponse)
-                peripheral.discoverDescriptors(for: characteristic)
-            }
+//            if characteristic.uuid == CBUUID(string: "FEC7") {
+//                peripheral.writeValue(Data([0xf0]), for: characteristic, type: .withResponse)
+//            }
+//
+//            if characteristic.uuid == CBUUID(string: "FEC9") {
 //                peripheral.readValue(for: characteristic)
+//            }
+            peripheral.readValue(for: characteristic)
         }
     }
     
@@ -120,7 +186,7 @@ extension ThermometerViewController: CBPeripheralDelegate {
             print("Failed… error: \(error)")
             return
         }
-
+        
         print("characteristic uuid: \(characteristic))")
         
         if characteristic.value != nil {
@@ -129,7 +195,7 @@ extension ThermometerViewController: CBPeripheralDelegate {
                 print("Value Recieved: \((characteristicASCIIValue as String))")
                 NotificationCenter.default.post(name:NSNotification.Name(rawValue: "Notify"), object: nil)
             } else {
-                temperatureConvertValue(from: characteristic)
+               print("didUpdateValueFor \(characteristic)")
             }
         }
     }
@@ -138,7 +204,7 @@ extension ThermometerViewController: CBPeripheralDelegate {
         print("*******************************************************")
         
         if error != nil {
-            print("didDiscoverDescriptorsFor \(error.debugDescription)")
+            print("error didDiscoverDescriptorsFor \(error.debugDescription)")
             return
         }
         
@@ -147,7 +213,7 @@ extension ThermometerViewController: CBPeripheralDelegate {
                 let descript = x as CBDescriptor?
                 peripheral.readValue(for: descript!)
                 print("function name: DidDiscoverDescriptorForChar \(String(describing: descript))")
-                print("Rx Value \(String(describing: rxCharacteristic?.value))")
+                print("Rx Value \(String(describing: characteristic.value))")
             }
         }
     }
@@ -162,7 +228,7 @@ extension ThermometerViewController: CBPeripheralDelegate {
         }
         
         if (characteristic.isNotifying) {
-            print ("Subscribed. Notification has begun for: \(characteristic.uuid) \(String(describing: characteristic.value))")
+            print ("Subscribed. Notification has begun for: \(characteristic.uuid) \(String(describing: characteristic))")
         }
     }
     
@@ -177,6 +243,7 @@ extension ThermometerViewController: CBPeripheralDelegate {
             return
         }
         print("Message sent \(characteristic)")
+        peripheral.readValue(for: characteristic)
     }
     
     func peripheral(_ peripheral: CBPeripheral, didWriteValueFor descriptor: CBDescriptor, error: Error?) {
@@ -186,7 +253,7 @@ extension ThermometerViewController: CBPeripheralDelegate {
         }
         print("Succeeded!")
     }
-    
+
     func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor descriptor: CBDescriptor, error: Error?) {
         guard error == nil else {
             print("Error didUpdateValueFor descriptor: \(error.debugDescription)")
@@ -198,48 +265,5 @@ extension ThermometerViewController: CBPeripheralDelegate {
         if descriptor.value != nil {
             print("descriptor value: \(String(describing: descriptor.value))")
         }
-    }
-    
-    private func temperatureConvertValue(from characteristic: CBCharacteristic) {
-        if let characteristicData = characteristic.value {
-            let byteArray = [UInt8](characteristicData)
- 
-            let firstBitValue = byteArray[0] & 0x01
-            if firstBitValue == 0 {
-                // temp in Celsius
-                var binary = String(Int(byteArray[2]),radix: 2)
-                if binary.count < 8 {
-                    let count = 8 - binary.count
-                    for i in 0..<count {
-                        binary = "0" + binary
-                    }
-                }
-                var binary2 = String(Int(byteArray[3]),radix: 2)
-                if binary2.count < 8 {
-                    let count = 8 - binary2.count
-                    for i in 0..<count {
-                        binary2 = "0" + binary2
-                    }
-                }
-                print("binary \(binary)")
-                print("binary2 \(binary2)")
-        
-                print(binary + binary2)
-                let decimal = Int(binary+binary2, radix:2)!
-                let temp = Double(decimal) / 100
-                print(decimal)
-                print(temp)
-                tempLabel.text = "\(roundedValue(value: temp)) °C"
-                //temp in Fahrenheit
-                let tempFar = (9/5) * temp + 32
-                tempFarLabel.text = "\(roundedValue(value: tempFar)) °F"
-            }
-        }
-    }
-    
-    func roundedValue(value: Double) -> Double{
-        let multiplier = pow(10.0, 1.0)
-        let rounded = round((value) * multiplier) / multiplier
-        return rounded
     }
 }

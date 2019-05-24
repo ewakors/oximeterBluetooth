@@ -13,6 +13,7 @@
 		940C62302285B2E40024D1C5 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 940C622E2285B2E40024D1C5 /* Main.storyboard */; };
 		940C62322285B2E90024D1C5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 940C62312285B2E90024D1C5 /* Assets.xcassets */; };
 		940C62352285B2E90024D1C5 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 940C62332285B2E90024D1C5 /* LaunchScreen.storyboard */; };
+		94CFABF92295621F000466F3 /* WeightScaleViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94CFABF82295621F000466F3 /* WeightScaleViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +25,7 @@
 		940C62312285B2E90024D1C5 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		940C62342285B2E90024D1C5 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		940C62362285B2E90024D1C5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		94CFABF82295621F000466F3 /* WeightScaleViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeightScaleViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -56,15 +58,24 @@
 		940C62292285B2E40024D1C5 /* TestBluetooth */ = {
 			isa = PBXGroup;
 			children = (
-				940C622A2285B2E40024D1C5 /* AppDelegate.swift */,
+				94CFABFA2295622D000466F3 /* Support */,
 				940C622C2285B2E40024D1C5 /* ViewController.swift */,
 				94057D90228EB92400E1DF7C /* ThermometerViewController.swift */,
-				940C622E2285B2E40024D1C5 /* Main.storyboard */,
-				940C62312285B2E90024D1C5 /* Assets.xcassets */,
-				940C62332285B2E90024D1C5 /* LaunchScreen.storyboard */,
+				94CFABF82295621F000466F3 /* WeightScaleViewController.swift */,
 				940C62362285B2E90024D1C5 /* Info.plist */,
 			);
 			path = TestBluetooth;
+			sourceTree = "<group>";
+		};
+		94CFABFA2295622D000466F3 /* Support */ = {
+			isa = PBXGroup;
+			children = (
+				940C62332285B2E90024D1C5 /* LaunchScreen.storyboard */,
+				940C62312285B2E90024D1C5 /* Assets.xcassets */,
+				940C622A2285B2E40024D1C5 /* AppDelegate.swift */,
+				940C622E2285B2E40024D1C5 /* Main.storyboard */,
+			);
+			path = Support;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -139,6 +150,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				94057D91228EB92400E1DF7C /* ThermometerViewController.swift in Sources */,
+				94CFABF92295621F000466F3 /* WeightScaleViewController.swift in Sources */,
 				940C622D2285B2E40024D1C5 /* ViewController.swift in Sources */,
 				940C622B2285B2E40024D1C5 /* AppDelegate.swift in Sources */,
 			);
