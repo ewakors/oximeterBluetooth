@@ -10,6 +10,35 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
+        <!--Blood pressure-->
+        <scene sceneID="BNh-63-p9r">
+            <objects>
+                <viewController id="3ci-Il-qUh" customClass="BloodPressureViewController" customModule="TestBluetooth" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="IeW-Bv-lVi">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="hLL-G9-YP1">
+                                <rect key="frame" x="180.5" y="763" width="53" height="30"/>
+                                <state key="normal" title="Refresh"/>
+                                <connections>
+                                    <action selector="refreshButton:" destination="3ci-Il-qUh" eventType="touchUpInside" id="TLI-Yh-3LI"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="3mJ-eL-s7o" firstAttribute="bottom" secondItem="hLL-G9-YP1" secondAttribute="bottom" constant="20" id="cA3-Bg-4pK"/>
+                            <constraint firstItem="hLL-G9-YP1" firstAttribute="centerX" secondItem="IeW-Bv-lVi" secondAttribute="centerX" id="jAe-gc-fZi"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="3mJ-eL-s7o"/>
+                    </view>
+                    <tabBarItem key="tabBarItem" title="Blood pressure" id="Vj2-Qr-LGx"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="qzc-iB-fQv" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-578" y="548"/>
+        </scene>
         <!--Thermometer-->
         <scene sceneID="5Uf-0m-uyz">
             <objects>
@@ -68,7 +97,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="4Uz-Ud-C4X" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="601" y="81"/>
+            <point key="canvasLocation" x="739" y="-225"/>
         </scene>
         <!--Weight Scale-->
         <scene sceneID="3yr-3V-Wht">
@@ -88,30 +117,55 @@
                                     <action selector="refreshButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="vZO-Zh-R5c"/>
                                 </connections>
                             </button>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Weight: --" textAlignment="natural" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="k3L-tO-noG">
-                                <rect key="frame" x="156" y="434.5" width="102.5" height="27.5"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="23"/>
-                                <nil key="textColor"/>
-                                <nil key="highlightedColor"/>
-                            </label>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="3hN-nc-Adk">
+                                <rect key="frame" x="168.5" y="378" width="77" height="140"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Weight:" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="feT-zG-0Ba">
+                                        <rect key="frame" x="0.0" y="0.0" width="77" height="27.5"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="23"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="--" textAlignment="center" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="k3L-tO-noG">
+                                        <rect key="frame" x="0.0" y="37.5" width="77" height="27.5"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="23"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="--" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Lr0-wM-0NE">
+                                        <rect key="frame" x="0.0" y="75" width="77" height="27.5"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="23"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="--" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="BZK-HN-L0U">
+                                        <rect key="frame" x="0.0" y="112.5" width="77" height="27.5"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="23"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                </subviews>
+                            </stackView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
-                            <constraint firstItem="k3L-tO-noG" firstAttribute="centerY" secondItem="tAj-Mp-QIg" secondAttribute="centerY" id="HPt-Tg-wzd"/>
+                            <constraint firstItem="3hN-nc-Adk" firstAttribute="centerX" secondItem="tAj-Mp-QIg" secondAttribute="centerX" id="F6R-s0-Lb6"/>
                             <constraint firstItem="XcT-x4-aNP" firstAttribute="centerX" secondItem="tAj-Mp-QIg" secondAttribute="centerX" id="Iuw-y6-8H0"/>
                             <constraint firstItem="Xx7-gh-Rse" firstAttribute="bottom" secondItem="XcT-x4-aNP" secondAttribute="bottom" constant="20" id="MX3-Hq-KWu"/>
-                            <constraint firstItem="k3L-tO-noG" firstAttribute="centerX" secondItem="tAj-Mp-QIg" secondAttribute="centerX" id="Tqp-b6-XHN"/>
+                            <constraint firstItem="3hN-nc-Adk" firstAttribute="centerY" secondItem="tAj-Mp-QIg" secondAttribute="centerY" id="wIQ-AS-6z2"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="Xx7-gh-Rse"/>
                     </view>
                     <tabBarItem key="tabBarItem" title="Weight Scale" id="IEl-ej-U2l"/>
                     <connections>
+                        <outlet property="weight3Label" destination="BZK-HN-L0U" id="Xnf-5F-8EA"/>
                         <outlet property="weightLabel" destination="k3L-tO-noG" id="zwl-fs-oFX"/>
+                        <outlet property="weightLbsLabel" destination="Lr0-wM-0NE" id="uD6-Tw-WO2"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="n0t-hc-11l" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-477" y="429"/>
+            <point key="canvasLocation" x="817" y="437"/>
         </scene>
         <!--Tab Bar Controller-->
         <scene sceneID="Lcc-u1-Nvx">
@@ -126,6 +180,7 @@
                         <segue destination="The-SA-Xb5" kind="relationship" relationship="viewControllers" id="eSP-l5-v19"/>
                         <segue destination="BYZ-38-t0r" kind="relationship" relationship="viewControllers" id="xKh-Sh-Hso"/>
                         <segue destination="ZlS-T3-cN0" kind="relationship" relationship="viewControllers" id="cc2-XR-Xgq"/>
+                        <segue destination="3ci-Il-qUh" kind="relationship" relationship="viewControllers" id="pKw-EK-xy5"/>
                     </connections>
                 </tabBarController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="oMw-DH-EtO" userLabel="First Responder" sceneMemberID="firstResponder"/>

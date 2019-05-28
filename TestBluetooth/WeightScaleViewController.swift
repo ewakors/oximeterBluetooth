@@ -12,13 +12,12 @@ import CoreBluetooth
 class WeightScaleViewController: UIViewController {
     
     let weightServiceId = "0000fee7-0000-1000-8000-00805f9b34fb"
-    let weightIndicateCharacteristicId = "0000fec8-0000-1000-8000-00805f9b34fb"
-    let weightCharacteristicDescriptorId = "00002902-0000-1000-8000-00805f9b34fb"
     
     var centralManager: CBCentralManager!
     
     @IBOutlet weak var weightLabel: UILabel!
-    
+    @IBOutlet weak var weightLbsLabel: UILabel!
+    @IBOutlet weak var weight3Label: UILabel!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -110,7 +109,9 @@ extension WeightScaleViewController: CBCentralManagerDelegate {
                 
                 print(decimal)
                 print("weight: \(weightKg)")
-                weightLabel.text = "weight: \(roundedValue(value: weightKg)) kg"
+                weightLabel.text = "\(roundedValue(value: weightKg)) kg"
+                weightLbsLabel.text = "\(roundedValue(value: weightKg * 2.20462) ) lbs"
+                weight3Label.text = "\(roundedValue(value: weightKg * 2) ) ft"
             }
         }
     

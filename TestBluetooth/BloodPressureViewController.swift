@@ -1,42 +1,36 @@
 //
-//  ViewController.swift
+//  BloodPressureViewController.swift
 //  TestBluetooth
 //
-//  Created by goapps on 10/05/2019.
+//  Created by goapps on 28/05/2019.
 //  Copyright © 2019 pl.goapps. All rights reserved.
 //
 
 import UIKit
 import CoreBluetooth
 
-class ViewController: UIViewController {
+class BloodPressureViewController: UIViewController {
     
-    var fingerServiceId = "0000ffb0-0000-1000-8000-00805f9b34fb"
-    var fingerCharacteriscticId = "0000ffb2-0000-1000-8000-00805f9b34fb"
-    var fingerCharacteriscticDescriptorId = "00002902-0000-1000-8000-00805f9b34fb"
+    var pressureServiceId = "00001523-1212-EFDE-1523-785FEABCD123"
+    var pressureCharacteriscticId = "00001524-1212-efde-1523-785feabcd123"
     
     var centralManager: CBCentralManager!
-    var fingerPeriferial: CBPeripheral!
-    
-    var rxCharacteristic : CBCharacteristic?
-    var txCharacteristic : CBCharacteristic?
-    
+    var peripheral: CBPeripheral!
+
     var characteristicASCIIValue = NSString()
-    
-    @IBOutlet weak var spo2Label: UILabel!
-    @IBOutlet weak var bpmLabel: UILabel!
-    @IBOutlet weak var piLabel: UILabel!
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         centralManager = CBCentralManager(delegate: self, queue: nil)
+    }
+    override func viewDidDisappear(_ animated: Bool) {
+        centralManager = nil
     }
     @IBAction func refreshButton(_ sender: Any) {
         centralManager = CBCentralManager(delegate: self, queue: nil)
     }
 }
-
-extension ViewController: CBCentralManagerDelegate {
+extension BloodPressureViewController: CBCentralManagerDelegate {
     
     // shows bluettoth state
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
@@ -55,8 +49,8 @@ extension ViewController: CBCentralManagerDelegate {
             print("central.state is .poweredOn")
             
             // set to discover devices only with this service id
-            let fingerRateServiceUUId = CBUUID(string: fingerServiceId)
-            centralManager.scanForPeripherals(withServices: [fingerRateServiceUUId])
+            let pressureServiceUUId = CBUUID(string: "1810")
+            centralManager.scanForPeripherals(withServices: [pressureServiceUUId])
             
         @unknown default:
             fatalError()
@@ -68,27 +62,25 @@ extension ViewController: CBCentralManagerDelegate {
         
         //shows nerby devics
         print(peripheral)
-        fingerPeriferial = peripheral
-        fingerPeriferial.delegate = self
+        self.peripheral = peripheral
+        self.peripheral.delegate = self
         centralManager.stopScan()
-        centralManager.connect(fingerPeriferial)
+        centralManager.connect(peripheral)
     }
     
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
-        print("connected to finger")
-        fingerPeriferial.discoverServices(nil)
+        print("connected to pressure")
+        peripheral.discoverServices(nil)
     }
 }
-
-extension ViewController: CBPeripheralDelegate {
+extension BloodPressureViewController: CBPeripheralDelegate {
     
     //obtain all services
     func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
         
         guard let services = peripheral.services else { return }
         for serivce in services {
-            //            print("ere")
-            //            print(serivce)
+            print(serivce)
             
             peripheral.discoverCharacteristics(nil, for: serivce)
         }
@@ -101,17 +93,12 @@ extension ViewController: CBPeripheralDelegate {
         }
         
         guard let characteristics = service.characteristics else { return }
-        let fingerCharacteristicUUID = CBUUID(string: "0000ffb2-0000-1000-8000-00805f9b34fb")
+        let pressureCharacteristicUUID = CBUUID(string: pressureCharacteriscticId)
         for characteristic in characteristics {
             print(characteristic)
-            //uuid: FFB0, propertis: Write without response, notify
-            if characteristic.uuid == fingerCharacteristicUUID {
-                
-                rxCharacteristic =  characteristic
-                //send value _command_para_on Data(bytes: [-86, 85, 15, 3, -124, 1, -32]) 0xAA550F038401E0 [0xAA, 0x55, 0x0F, 0x03, 0x84, 0x01, 0xE0]
-                //send value _command_wave_on Data(bytes: [-86, 85, 15, 3, -123, 1, 36]) 0xAA550F038401E0 [0xAA, 0x55, 0x0F, 0x03, 0x85, 0x01, 0x24]
-                peripheral.writeValue(Data([0xAA, 0x55, 0x0F, 0x03, 0x84, 0x01, 0xE0]), for: characteristic, type: .withoutResponse)
-//                peripheral.writeValue(Data([0xAA, 0x55, 0x0F, 0x03, 0x85, 0x01, 0x24]), for: characteristic, type: .withoutResponse)
+            // propertis: Write response, notify
+            if characteristic.uuid == pressureCharacteristicUUID {
+                peripheral.writeValue(Data([0x51, 0x25, 0x00, 0x00, 0x00, 0x00, 0xA3]), for: characteristic, type: .withResponse)
                 
                 peripheral.setNotifyValue(true, for: characteristic)
                 
@@ -159,8 +146,7 @@ extension ViewController: CBPeripheralDelegate {
                 let descript = x as CBDescriptor?
                 peripheral.readValue(for: descript!)
                 print("function name: DidDiscoverDescriptorForChar \(String(describing: descript))")
-                print("Rx Value \(String(describing: rxCharacteristic?.value))")
-                print("Tx Value \(String(describing: txCharacteristic?.value))")
+//                print("Rx Value \(String(describing: characteristic?.value))")
             }
         }
     }
@@ -223,11 +209,11 @@ extension ViewController: CBPeripheralDelegate {
             let firstBitValue = byteArray[0] & 0x01
             if firstBitValue == 0 {
                 let spo2Value = Int(byteArray[5])
-                spo2Label.text = "SpO2: \(spo2Value)"
+               print("SpO2: \(spo2Value)")
                 let bpmValue = Int(byteArray[6])
-                bpmLabel.text = "BPM: \(bpmValue)"
+                print("BPM: \(bpmValue)")
                 let piValue = Float(byteArray[8]) / 10
-                piLabel.text = "PI (%): \(piValue)"
+                print("PI (%): \(piValue)")
             }
         }
     }
