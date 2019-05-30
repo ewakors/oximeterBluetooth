@@ -16,7 +16,9 @@ class BloodPressureViewController: UIViewController {
     
     var centralManager: CBCentralManager!
     var peripheral: CBPeripheral!
-
+    
+    var rxCharacteristic : CBCharacteristic?
+    
     var characteristicASCIIValue = NSString()
 
     override func viewDidLoad() {
@@ -94,23 +96,30 @@ extension BloodPressureViewController: CBPeripheralDelegate {
         
         guard let characteristics = service.characteristics else { return }
         let pressureCharacteristicUUID = CBUUID(string: pressureCharacteriscticId)
+        let bloodCharacteristicUUID = CBUUID(string: "2A35")
         for characteristic in characteristics {
             print(characteristic)
             // propertis: Write response, notify
+
+            
+            if characteristic.uuid == bloodCharacteristicUUID {
+                peripheral.setNotifyValue(true, for: characteristic)
+//                peripheral.readValue(for: characteristic)
+            }
             if characteristic.uuid == pressureCharacteristicUUID {
-                peripheral.writeValue(Data([0x51, 0x25, 0x00, 0x00, 0x00, 0x00, 0xA3]), for: characteristic, type: .withResponse)
                 
                 peripheral.setNotifyValue(true, for: characteristic)
+
+                peripheral.writeValue(Data([0x51, 0x2b, 0x02, 0x0, 0x0, 0x0]), for: characteristic, type: .withResponse)
+//
+                rxCharacteristic =  characteristic
                 
-                print("fantastish \(characteristic)")
                 print("Rx characteristic: \(characteristic.uuid)")
-                
-                //descritors
-                peripheral.discoverDescriptors(for: characteristic)
-            } else {
-                // Device information
-                peripheral.readValue(for: characteristic)
             }
+//            else {
+//                // Device information
+//                peripheral.readValue(for: characteristic)
+//            }
         }
     }
     
@@ -146,7 +155,7 @@ extension BloodPressureViewController: CBPeripheralDelegate {
                 let descript = x as CBDescriptor?
                 peripheral.readValue(for: descript!)
                 print("function name: DidDiscoverDescriptorForChar \(String(describing: descript))")
-//                print("Rx Value \(String(describing: characteristic?.value))")
+              print("Rx Value \(String(describing: rxCharacteristic?.value))")
             }
         }
     }
@@ -200,20 +209,40 @@ extension BloodPressureViewController: CBPeripheralDelegate {
     }
     
     private func oximeterSpO2ConvertValue(from characteristic: CBCharacteristic) {
-        //guard let characteristicData = characteristic.value else { print("oximeter converter error") }
         if let characteristicData = characteristic.value {
             let byteArray = [UInt8](characteristicData)
-            // The SpO2 is in the 6 bytes, i.e. aa550f08 01603e00 0d00c063 => x60 in Hexadecimal = 96 decimal
-            // The BPM (beat per minute) is in the 7 bytes, i.e. aa550f08 01603e00 0d00c063 => x3e in Hexadecimal = 62 decimal
-            //  PI (Perfusion Index) is in the 9 bytes, i.e. aa550f08 01603e00 0d00c063 => x0d in Hexadecimal = 13 decimal => 1,3%
             let firstBitValue = byteArray[0] & 0x01
             if firstBitValue == 0 {
-                let spo2Value = Int(byteArray[5])
-               print("SpO2: \(spo2Value)")
-                let bpmValue = Int(byteArray[6])
-                print("BPM: \(bpmValue)")
-                let piValue = Float(byteArray[8]) / 10
-                print("PI (%): \(piValue)")
+                let sysValue = Int(byteArray[1])
+                print("Systolic: \(sysValue)")
+                let diaValue = Int(byteArray[3])
+                print("Diastolic: \(diaValue)")
+                let meanValue = Float(byteArray[5])
+                print("Mean AP: \(meanValue)")
+                let hour = Int(byteArray[11])
+                let minute = Int(byteArray[12])
+                let secund = Int(byteArray[13])
+                let day = Int(byteArray[10])
+                let mounth = Int(byteArray[9])
+                var year1 = String(Int(byteArray[7]),radix: 2)
+                if year1.count < 8 {
+                    let count = 8 - year1.count
+                    for i in 0..<count {
+                        year1 = "0" + year1
+                    }
+                }
+                var year2 = String(Int(byteArray[8]),radix: 2)
+                if year2.count < 8 {
+                    let count = 8 - year2.count
+                    for i in 0..<count {
+                        year2 = "0" + year2
+                    }
+                }
+
+                let year = Int(year2+year1, radix:2)!
+                print("Timestamp: \(hour):\(minute):\(secund) \(day-1).\(mounth+1).\(year)")
+                let pulseValue = Int(byteArray[14])
+                print("Pulse: \(pulseValue)")
             }
         }
     }

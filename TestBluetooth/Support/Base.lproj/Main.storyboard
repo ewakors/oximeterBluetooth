@@ -19,7 +19,8 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="hLL-G9-YP1">
-                                <rect key="frame" x="180.5" y="763" width="53" height="30"/>
+                                <rect key="frame" x="170" y="757" width="74" height="36"/>
+                                <fontDescription key="fontDescription" type="boldSystem" pointSize="20"/>
                                 <state key="normal" title="Refresh"/>
                                 <connections>
                                     <action selector="refreshButton:" destination="3ci-Il-qUh" eventType="touchUpInside" id="TLI-Yh-3LI"/>
