@@ -11,6 +11,12 @@ import CoreBluetooth
 
 class BloodPressureViewController: UIViewController {
     
+    @IBOutlet weak var systolicLabel: UILabel!
+    @IBOutlet weak var diastolicLabel: UILabel!
+    @IBOutlet weak var meanLabel: UILabel!
+    @IBOutlet weak var timestampLabel: UILabel!
+    @IBOutlet weak var pulseLabel: UILabel!
+    
     var pressureServiceId = "00001523-1212-EFDE-1523-785FEABCD123"
     var pressureCharacteriscticId = "00001524-1212-efde-1523-785feabcd123"
     
@@ -27,9 +33,20 @@ class BloodPressureViewController: UIViewController {
     }
     override func viewDidDisappear(_ animated: Bool) {
         centralManager = nil
+        systolicLabel.text = "--"
+        diastolicLabel.text = "--"
+        meanLabel.text = "--"
+        timestampLabel.text = "--"
+        pulseLabel.text = "--"
     }
     @IBAction func refreshButton(_ sender: Any) {
+        centralManager = nil
         centralManager = CBCentralManager(delegate: self, queue: nil)
+        systolicLabel.text = "--"
+        diastolicLabel.text = "--"
+        meanLabel.text = "--"
+        timestampLabel.text = "--"
+        pulseLabel.text = "--"
     }
 }
 extension BloodPressureViewController: CBCentralManagerDelegate {
@@ -82,8 +99,6 @@ extension BloodPressureViewController: CBPeripheralDelegate {
         
         guard let services = peripheral.services else { return }
         for serivce in services {
-            print(serivce)
-            
             peripheral.discoverCharacteristics(nil, for: serivce)
         }
     }
@@ -99,27 +114,15 @@ extension BloodPressureViewController: CBPeripheralDelegate {
         let bloodCharacteristicUUID = CBUUID(string: "2A35")
         for characteristic in characteristics {
             print(characteristic)
-            // propertis: Write response, notify
-
-            
             if characteristic.uuid == bloodCharacteristicUUID {
                 peripheral.setNotifyValue(true, for: characteristic)
-//                peripheral.readValue(for: characteristic)
             }
             if characteristic.uuid == pressureCharacteristicUUID {
-                
                 peripheral.setNotifyValue(true, for: characteristic)
-
-                peripheral.writeValue(Data([0x51, 0x2b, 0x02, 0x0, 0x0, 0x0]), for: characteristic, type: .withResponse)
-//
+                peripheral.writeValue(Data([0x51, 0x2b, 0x02, 0x0, 0x0, 0x0, 0xa3]), for: characteristic, type: .withResponse)
                 rxCharacteristic =  characteristic
-                
                 print("Rx characteristic: \(characteristic.uuid)")
             }
-//            else {
-//                // Device information
-//                peripheral.readValue(for: characteristic)
-//            }
         }
     }
     
@@ -137,28 +140,11 @@ extension BloodPressureViewController: CBPeripheralDelegate {
                 print("Value Recieved: \((characteristicASCIIValue as String))")
                 NotificationCenter.default.post(name:NSNotification.Name(rawValue: "Notify"), object: nil)
             } else {
-                oximeterSpO2ConvertValue(from: characteristic)
+                bloodPressureConvertValue(from: characteristic)
             }
         }
     }
-    
-    func peripheral(_ peripheral: CBPeripheral, didDiscoverDescriptorsFor characteristic: CBCharacteristic, error: Error?) {
-        print("*******************************************************")
-        
-        if error != nil {
-            print("didDiscoverDescriptorsFor \(error.debugDescription)")
-            return
-        }
-        
-        if ((characteristic.descriptors) != nil) {
-            for x in characteristic.descriptors!{
-                let descript = x as CBDescriptor?
-                peripheral.readValue(for: descript!)
-                print("function name: DidDiscoverDescriptorForChar \(String(describing: descript))")
-              print("Rx Value \(String(describing: rxCharacteristic?.value))")
-            }
-        }
-    }
+
     func peripheral(_ peripheral: CBPeripheral, didUpdateNotificationStateFor characteristic: CBCharacteristic, error: Error?) {
         print("*******************************************************")
         
@@ -186,39 +172,15 @@ extension BloodPressureViewController: CBPeripheralDelegate {
         }
         print("Message sent")
     }
-    
-    func peripheral(_ peripheral: CBPeripheral, didWriteValueFor descriptor: CBDescriptor, error: Error?) {
-        guard error == nil else {
-            print("Error discovering services: error")
-            return
-        }
-        print("Succeeded!")
-    }
-    
-    func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor descriptor: CBDescriptor, error: Error?) {
-        guard error == nil else {
-            print("Error didUpdateValueFor descriptor: \(error.debugDescription)")
-            return
-        }
-        
-        print("descriptor Succeeded! \(descriptor)")
-        
-        if descriptor.value != nil {
-            print("descriptor value: \(String(describing: descriptor.value))")
-        }
-    }
-    
-    private func oximeterSpO2ConvertValue(from characteristic: CBCharacteristic) {
+
+    private func bloodPressureConvertValue(from characteristic: CBCharacteristic) {
         if let characteristicData = characteristic.value {
             let byteArray = [UInt8](characteristicData)
             let firstBitValue = byteArray[0] & 0x01
             if firstBitValue == 0 {
-                let sysValue = Int(byteArray[1])
-                print("Systolic: \(sysValue)")
-                let diaValue = Int(byteArray[3])
-                print("Diastolic: \(diaValue)")
+                let sysValue = Float(byteArray[1])
+                let diaValue = Float(byteArray[3])
                 let meanValue = Float(byteArray[5])
-                print("Mean AP: \(meanValue)")
                 let hour = Int(byteArray[11])
                 let minute = Int(byteArray[12])
                 let secund = Int(byteArray[13])
@@ -238,11 +200,19 @@ extension BloodPressureViewController: CBPeripheralDelegate {
                         year2 = "0" + year2
                     }
                 }
-
                 let year = Int(year2+year1, radix:2)!
-                print("Timestamp: \(hour):\(minute):\(secund) \(day-1).\(mounth+1).\(year)")
-                let pulseValue = Int(byteArray[14])
+                let pulseValue = Float(byteArray[14])
+                
+                print("Systolic: \(sysValue)")
+                print("Diastolic: \(diaValue)")
+                print("Mean AP: \(meanValue)")
+                print("Timestamp: \(hour):\(minute):\(secund) \(day).\(mounth).\(year)")
                 print("Pulse: \(pulseValue)")
+                systolicLabel.text = "Systolic: \(sysValue) mmHg"
+                diastolicLabel.text = "Diastolic: \(diaValue) mmHg"
+                meanLabel.text = "Mean AP: \(meanValue) mmHg"
+                timestampLabel.text = "Timestamp: \(hour):\(minute):\(secund) \(day).\(mounth).\(year)"
+                pulseLabel.text = "Pulse: \(pulseValue) bpm"
             }
         }
     }

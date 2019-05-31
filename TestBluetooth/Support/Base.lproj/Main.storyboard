@@ -26,15 +26,59 @@
                                     <action selector="refreshButton:" destination="3ci-Il-qUh" eventType="touchUpInside" id="TLI-Yh-3LI"/>
                                 </connections>
                             </button>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="528-pu-wVs">
+                                <rect key="frame" x="198" y="368" width="18" height="160"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="--" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="uCo-oC-zGP">
+                                        <rect key="frame" x="0.0" y="0.0" width="18" height="24"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="20"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="--" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="qS9-7I-cVC">
+                                        <rect key="frame" x="0.0" y="34" width="18" height="24"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="20"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="--" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="BEu-uM-vyq">
+                                        <rect key="frame" x="0.0" y="68" width="18" height="24"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="20"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="--" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="j28-pj-iMJ">
+                                        <rect key="frame" x="0.0" y="102" width="18" height="24"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="20"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="--" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Boe-hN-wEq">
+                                        <rect key="frame" x="0.0" y="136" width="18" height="24"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="20"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                </subviews>
+                            </stackView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
                             <constraint firstItem="3mJ-eL-s7o" firstAttribute="bottom" secondItem="hLL-G9-YP1" secondAttribute="bottom" constant="20" id="cA3-Bg-4pK"/>
+                            <constraint firstItem="528-pu-wVs" firstAttribute="centerY" secondItem="IeW-Bv-lVi" secondAttribute="centerY" id="fhf-kz-LDK"/>
                             <constraint firstItem="hLL-G9-YP1" firstAttribute="centerX" secondItem="IeW-Bv-lVi" secondAttribute="centerX" id="jAe-gc-fZi"/>
+                            <constraint firstItem="528-pu-wVs" firstAttribute="centerX" secondItem="IeW-Bv-lVi" secondAttribute="centerX" id="wC8-tH-iFM"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="3mJ-eL-s7o"/>
                     </view>
                     <tabBarItem key="tabBarItem" title="Blood pressure" id="Vj2-Qr-LGx"/>
+                    <connections>
+                        <outlet property="diastolicLabel" destination="qS9-7I-cVC" id="7hb-3c-gc7"/>
+                        <outlet property="meanLabel" destination="BEu-uM-vyq" id="yPA-uG-2qD"/>
+                        <outlet property="pulseLabel" destination="Boe-hN-wEq" id="2lA-U2-pRg"/>
+                        <outlet property="systolicLabel" destination="uCo-oC-zGP" id="spH-BC-SWX"/>
+                        <outlet property="timestampLabel" destination="j28-pj-iMJ" id="74d-Sj-EMz"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="qzc-iB-fQv" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
