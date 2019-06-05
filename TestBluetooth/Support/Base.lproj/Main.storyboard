@@ -82,7 +82,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="qzc-iB-fQv" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-578" y="548"/>
+            <point key="canvasLocation" x="-1375" y="704"/>
         </scene>
         <!--Thermometer-->
         <scene sceneID="5Uf-0m-uyz">

@@ -93,7 +93,6 @@ extension BloodPressureViewController: CBCentralManagerDelegate {
     }
 }
 extension BloodPressureViewController: CBPeripheralDelegate {
-    
     //obtain all services
     func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
         
@@ -118,10 +117,23 @@ extension BloodPressureViewController: CBPeripheralDelegate {
                 peripheral.setNotifyValue(true, for: characteristic)
             }
             if characteristic.uuid == pressureCharacteristicUUID {
+                
+                let data = Data([0x51, 0x54, 0x0, 0x0, 0x0, 0x0, 0xa3,0xb8])
+                
+                let result = 256 - data.checksum
+                print("0x\(String(result, radix: 16))")
+//                peripheral.writeValue(Data([0x51, 0x26, 0x0, 0x01, 0x0, 0x01, 0xa3,0x1c]), for: characteristic, type: .withResponse)
+                //turn off device
+                peripheral.writeValue(Data([0x51, 0x50, 0x0, 0x0, 0x0, 0x0, 0xa3,0x44]), for: characteristic, type: .withResponse)
                 peripheral.setNotifyValue(true, for: characteristic)
-                peripheral.writeValue(Data([0x51, 0x2b, 0x02, 0x0, 0x0, 0x0, 0xa3]), for: characteristic, type: .withResponse)
+//                peripheral.writeValue(Data([0x51, 0x25, 0x0, 0x0, 0x0, 0x0, 0xa3,0xe7]), for: characteristic, type: .withResponse)
+//                peripheral.writeValue(Data([0x51, 0x26, 0x0, 0x0, 0x0, 0x0, 0xa3,0xe6]), for: characteristic, type: .withResponse)
+//                peripheral.writeValue(Data([0x51, 0x50, 0x0, 0x0, 0x0, 0x0, 0xa3,0xbc]), for: characteristic, type: .withResponse)
+//                peripheral.writeValue(data, for: characteristic, type: .withResponse)
+
                 rxCharacteristic =  characteristic
-                print("Rx characteristic: \(characteristic.uuid)")
+                print("Rx characteristic: \(characteristic)")
+                
             }
         }
     }
@@ -156,14 +168,13 @@ extension BloodPressureViewController: CBPeripheralDelegate {
         }
         
         if (characteristic.isNotifying) {
-            print ("Subscribed. Notification has begun for: \(characteristic.uuid) \(String(describing: characteristic.value))")
+            print ("Subscribed. Notification has begun for: \(characteristic.uuid) \(String(describing: characteristic))")
         }
     }
     
     func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
         print("Disconnected")
     }
-    
     
     func peripheral(_ peripheral: CBPeripheral, didWriteValueFor characteristic: CBCharacteristic, error: Error?) {
         guard error == nil else {
@@ -189,14 +200,14 @@ extension BloodPressureViewController: CBPeripheralDelegate {
                 var year1 = String(Int(byteArray[7]),radix: 2)
                 if year1.count < 8 {
                     let count = 8 - year1.count
-                    for i in 0..<count {
+                    for _ in 0..<count {
                         year1 = "0" + year1
                     }
                 }
                 var year2 = String(Int(byteArray[8]),radix: 2)
                 if year2.count < 8 {
                     let count = 8 - year2.count
-                    for i in 0..<count {
+                    for _ in 0..<count {
                         year2 = "0" + year2
                     }
                 }
@@ -215,5 +226,11 @@ extension BloodPressureViewController: CBPeripheralDelegate {
                 pulseLabel.text = "Pulse: \(pulseValue) bpm"
             }
         }
+    }
+}
+
+extension Data {
+    var checksum: Int {
+        return self.map { Int($0) }.reduce(0, +) &  0xff
     }
 }
