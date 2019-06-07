@@ -26,7 +26,7 @@ class BloodPressureViewController: UIViewController {
     var rxCharacteristic : CBCharacteristic?
     
     var characteristicASCIIValue = NSString()
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         centralManager = CBCentralManager(delegate: self, queue: nil)
@@ -114,7 +114,7 @@ extension BloodPressureViewController: CBPeripheralDelegate {
         for characteristic in characteristics {
             print(characteristic)
             if characteristic.uuid == bloodCharacteristicUUID {
-                peripheral.setNotifyValue(true, for: characteristic)
+                //                peripheral.setNotifyValue(true, for: characteristic)
             }
             if characteristic.uuid == pressureCharacteristicUUID {
                 
@@ -122,18 +122,24 @@ extension BloodPressureViewController: CBPeripheralDelegate {
                 
                 let result = 256 - data.checksum
                 print("0x\(String(result, radix: 16))")
-//                peripheral.writeValue(Data([0x51, 0x26, 0x0, 0x01, 0x0, 0x01, 0xa3,0x1c]), for: characteristic, type: .withResponse)
-                //turn off device
-                peripheral.writeValue(Data([0x51, 0x50, 0x0, 0x0, 0x0, 0x0, 0xa3,0x44]), for: characteristic, type: .withResponse)
                 peripheral.setNotifyValue(true, for: characteristic)
-//                peripheral.writeValue(Data([0x51, 0x25, 0x0, 0x0, 0x0, 0x0, 0xa3,0xe7]), for: characteristic, type: .withResponse)
-//                peripheral.writeValue(Data([0x51, 0x26, 0x0, 0x0, 0x0, 0x0, 0xa3,0xe6]), for: characteristic, type: .withResponse)
-//                peripheral.writeValue(Data([0x51, 0x50, 0x0, 0x0, 0x0, 0x0, 0xa3,0xbc]), for: characteristic, type: .withResponse)
-//                peripheral.writeValue(data, for: characteristic, type: .withResponse)
 
+                peripheral.writeValue(Data([0x51, 0x25, 0x0, 0x02, 0x0, 0x02, 0xa3,0x1d]), for: characteristic, type: .withResponse)
+//                peripheral.writeValue(Data([0x51, 0x26, 0x0, 0x02, 0x0, 0x02, 0xa3,0x1e]), for: characteristic, type: .withResponse)
+                peripheral.setNotifyValue(true, for: characteristic)
+//                peripheral.writeValue(Data([0x51, 0x26, 0x0, 0x01, 0x0, 0x02, 0xa3, 0x1d]), for: characteristic, type: .withResponse)
+//                peripheral.setNotifyValue(true, for: characteristic)
+//                peripheral.writeValue(Data([0x51, 0x26, 0x0, 0x00, 0x0, 0x02, 0xa3,0x1c]), for: characteristic, type: .withResponse)
+                //turn off device
+                //                peripheral.writeValue(Data([0x51, 0x50, 0x0, 0x0, 0x0, 0x0, 0xa3, 0x44]), for: characteristic, type: .withResponse)
+                //                peripheral.setNotifyValue(true, for: characteristic)
+                //                peripheral.writeValue(Data([0x51, 0x25, 0x0, 0x0, 0x0, 0x0, 0xa3,0xe7]), for: characteristic, type: .withResponse)
+                //                peripheral.writeValue(Data([0x51, 0x26, 0x0, 0x0, 0x0, 0x0, 0xa3,0xe6]), for: characteristic, type: .withResponse)
+                //                peripheral.writeValue(Data([0x51, 0x50, 0x0, 0x0, 0x0, 0x0, 0xa3,0xbc]), for: characteristic, type: .withResponse)
+                //                peripheral.writeValue(data, for: characteristic, type: .withResponse)
+                
                 rxCharacteristic =  characteristic
                 print("Rx characteristic: \(characteristic)")
-                
             }
         }
     }
@@ -156,7 +162,7 @@ extension BloodPressureViewController: CBPeripheralDelegate {
             }
         }
     }
-
+    
     func peripheral(_ peripheral: CBPeripheral, didUpdateNotificationStateFor characteristic: CBCharacteristic, error: Error?) {
         print("*******************************************************")
         
@@ -183,11 +189,12 @@ extension BloodPressureViewController: CBPeripheralDelegate {
         }
         print("Message sent")
     }
-
+    
     private func bloodPressureConvertValue(from characteristic: CBCharacteristic) {
         if let characteristicData = characteristic.value {
             let byteArray = [UInt8](characteristicData)
             let firstBitValue = byteArray[0] & 0x01
+            let secondBitValue = byteArray[1]
             if firstBitValue == 0 {
                 let sysValue = Float(byteArray[1])
                 let diaValue = Float(byteArray[3])
@@ -224,6 +231,46 @@ extension BloodPressureViewController: CBPeripheralDelegate {
                 meanLabel.text = "Mean AP: \(meanValue) mmHg"
                 timestampLabel.text = "Timestamp: \(hour):\(minute):\(secund) \(day).\(mounth).\(year)"
                 pulseLabel.text = "Pulse: \(pulseValue) bpm"
+            } else if secondBitValue == 38 {
+                // result
+                let sysValue = Float(byteArray[2])
+                let diaValue = Float(byteArray[4])
+                let meanValue = Float(byteArray[3])
+                let pulseValue = Float(byteArray[5])
+                
+                print("Systolic: \(sysValue)")
+                print("Diastolic: \(diaValue)")
+                print("Mean AP: \(meanValue)")
+                print("Pulse: \(pulseValue)")
+                systolicLabel.text = "Systolic: \(sysValue) mmHg"
+                diastolicLabel.text = "Diastolic: \(diaValue) mmHg"
+                meanLabel.text = "Mean AP: \(meanValue) mmHg"
+                pulseLabel.text = "Pulse: \(pulseValue) bpm"
+            } else if secondBitValue == 37 {
+                //date
+                var binary = String(Int(byteArray[2]),radix: 2)
+                if binary.count < 8 {
+                    let count = 8 - binary.count
+                    for i in 0..<count {
+                        binary = "0" + binary
+                    }
+                }
+                var binary2 = String(Int(byteArray[3]),radix: 2)
+                if binary2.count < 8 {
+                    let count = 8 - binary2.count
+                    for i in 0..<count {
+                        binary2 = "0" + binary2
+                    }
+                }
+                print("binary \(binary)")
+                print("binary2 \(binary2)")
+                
+                print(binary2 + binary)
+//                let date = String(binary2) + String(binary)
+//                let day: Substring = date[0..<4]
+//                print(day)
+                let decimal = Int(binary2+binary, radix:2)!
+                print(decimal)
             }
         }
     }
