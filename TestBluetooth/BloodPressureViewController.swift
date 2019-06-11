@@ -26,6 +26,7 @@ class BloodPressureViewController: UIViewController {
     var rxCharacteristic : CBCharacteristic?
     
     var characteristicASCIIValue = NSString()
+    var dataNumber: Int = 0
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -112,33 +113,19 @@ extension BloodPressureViewController: CBPeripheralDelegate {
         let pressureCharacteristicUUID = CBUUID(string: pressureCharacteriscticId)
         let bloodCharacteristicUUID = CBUUID(string: "2A35")
         for characteristic in characteristics {
-            print(characteristic)
+            
             if characteristic.uuid == bloodCharacteristicUUID {
                 //                peripheral.setNotifyValue(true, for: characteristic)
             }
             if characteristic.uuid == pressureCharacteristicUUID {
-                var notifiactionData = Data([0x51, 0x54, 0x0, 0x0, 0x0, 0x0, 0xa3])
-//                user 1 time 2
-//                var timeData = Data([0x51, 0x25, 0x1, 0x0, 0x0, 0x0, 0xa3])
-                var timeData = Data([0x51, 0x25, 0x1, 0x0, 0x0, 0x2, 0xa3])
-                let timeSum = UInt8(timeData.checksum)
-                timeData.append(timeSum)
-                //user 1 result 2
-//                var resultData = Data([0x51, 0x26, 0x1, 0x0, 0x0, 0x0, 0xa3])
-                var resultData = Data([0x51, 0x26, 0x1, 0x0, 0x0, 0x2, 0xa3])
-                let resultSum = UInt8(resultData.checksum)
-                resultData.append(resultSum)
-                //Start a Blood Pressure measurement
-                var startData = Data([0x51, 0x43, 0x0, 0x0, 0x0, 0x0, 0xa3])
-                //turn off the deivce
-                var turnOffData = Data([0x51, 0x50, 0x0, 0x0, 0x0, 0x0, 0xa3])
-
+                //  Read storage number of data
+                var numberOfData = Data([0x51, 0x2b, 0x3, 0x0, 0x0, 0x0, 0xa3])
+                let numberSum = UInt8(numberOfData.checksum)
+                numberOfData.append(numberSum)
                 peripheral.setNotifyValue(true, for: characteristic)
-                peripheral.writeValue(notifiactionData, for: characteristic, type: .withResponse)
-
-                peripheral.writeValue(timeData, for: characteristic, type: .withResponse)
-                peripheral.writeValue(resultData, for: characteristic, type: .withResponse)
-                peripheral.setNotifyValue(true, for: characteristic)
+                peripheral.writeValue(numberOfData, for: characteristic, type: .withResponse)
+                
+                
             }
         }
     }
@@ -157,6 +144,14 @@ extension BloodPressureViewController: CBPeripheralDelegate {
                 print("Value Recieved: \((characteristicASCIIValue as String))")
                 NotificationCenter.default.post(name:NSNotification.Name(rawValue: "Notify"), object: nil)
             } else {
+                
+                if let characteristicData = characteristic.value  {
+                    let byteArray = [UInt8](characteristicData)
+                    let secondBitValue = byteArray[1]
+                    if secondBitValue == 43 {
+                        numberOfDataConvertValue(from: characteristic,peripheral: peripheral)
+                    }
+                }
                 bloodPressureConvertValue(from: characteristic)
             }
         }
@@ -286,6 +281,41 @@ extension BloodPressureViewController: CBPeripheralDelegate {
             diastolicLabel.text = "Diastolic: \(diaValue) mmHg"
             meanLabel.text = "Mean AP: \(meanValue) mmHg"
             pulseLabel.text = "Pulse: \(pulseValue) bpm"
+        }
+    }
+    
+    private func numberOfDataConvertValue(from characteristic: CBCharacteristic, peripheral: CBPeripheral) {
+        if let characteristicData = characteristic.value  {
+            let byteArray = [UInt8](characteristicData)
+
+            print("number: \(Int(byteArray[2]))")
+            
+                dataNumber = Int(byteArray[2])
+            if dataNumber > 0 {
+//                for i in 0..<dataNumber {
+                    var notifiactionData = Data([0x51, 0x54, 0x0, 0x0, 0x0, 0x0, 0xa3])
+                    //                user 1 time 2
+                    //                var timeData = Data([0x51, 0x25, 0x1, 0x0, 0x0, 0x0, 0xa3])
+                    var timeData = Data([0x51, 0x25, 0x1, 0x0, 0x0, 0x2, 0xa3])
+                    let timeSum = UInt8(timeData.checksum)
+                    timeData.append(timeSum)
+                    //user 1 result 2
+                    //                var resultData = Data([0x51, 0x26, 0x1, 0x0, 0x0, 0x0, 0xa3])
+                    var resultData = Data([0x51, 0x26, 0x1, 0x0, 0x0, 0x2, 0xa3])
+                    let resultSum = UInt8(resultData.checksum)
+                    resultData.append(resultSum)
+                    //Start a Blood Pressure measurement
+                    var startData = Data([0x51, 0x43, 0x0, 0x0, 0x0, 0x0, 0xa3])
+                    //turn off the deivce
+                    var turnOffData = Data([0x51, 0x50, 0x0, 0x0, 0x0, 0x0, 0xa3])
+                    
+                    peripheral.setNotifyValue(true, for: characteristic)
+                    
+                    peripheral.writeValue(timeData, for: characteristic, type: .withResponse)
+                    peripheral.writeValue(resultData, for: characteristic, type: .withResponse)
+                    peripheral.setNotifyValue(true, for: characteristic)
+//                }
+            }
         }
     }
     
