@@ -118,15 +118,20 @@ extension BloodPressureViewController: CBPeripheralDelegate {
             }
             if characteristic.uuid == pressureCharacteristicUUID {
                 
-                let data = Data([0x51, 0x54, 0x0, 0x0, 0x0, 0x0, 0xa3,0xb8])
+                var timeData = Data([0x51, 0x25, 0x0, 0x01, 0x0, 0x01, 0xa3])
+                var resultData = Data([0x51, 0x26, 0x0, 0x01, 0x0, 0x01, 0xa3])
                 
-                let result = 256 - data.checksum
-                print("0x\(String(result, radix: 16))")
+                let timeSum = UInt8(timeData.checksum)
+                timeData.append(timeSum)
+                
+                let resultSum = UInt8(resultData.checksum)
+                resultData.append(resultSum)
+                
                 peripheral.setNotifyValue(true, for: characteristic)
 //                peripheral.writeValue(Data([0x51, 0x25, 0x0, 0x0, 0x0, 0x02, 0xa3,0x1b]), for: characteristic, type: .withResponse)
 
-                peripheral.writeValue(Data([0x51, 0x25, 0x0, 0x02, 0x0, 0x02, 0xa3,0x1d]), for: characteristic, type: .withResponse)
-                peripheral.writeValue(Data([0x51, 0x26, 0x0, 0x02, 0x0, 0x02, 0xa3,0x1e]), for: characteristic, type: .withResponse)
+                peripheral.writeValue(timeData, for: characteristic, type: .withResponse)
+                peripheral.writeValue(resultData, for: characteristic, type: .withResponse)
                 peripheral.setNotifyValue(true, for: characteristic)
                 //                peripheral.writeValue(Data([0x51, 0x26, 0x0, 0x01, 0x0, 0x02, 0xa3, 0x1d]), for: characteristic, type: .withResponse)
                 //                peripheral.setNotifyValue(true, for: characteristic)
@@ -257,20 +262,14 @@ extension BloodPressureViewController: CBPeripheralDelegate {
                 var binary2 = String(Int(byteArray[3]),radix: 2)
                 binary2 = convertBinary(binary: binary2)
 
-                print("binary \(binary)")
-                print("binary2 \(binary2)")
-                
-                print(binary2 + binary)
                 let date = String(binary2) + String(binary)
                 let yearIndex = date.index(date.startIndex, offsetBy: 7)
                 let dayIndex = date.index(date.startIndex, offsetBy: 16)
                 let monthIndex = date.index(date.startIndex, offsetBy: 11)
-                print(date[date.startIndex..<yearIndex])
+                
                 year = Int(date[date.startIndex..<yearIndex], radix:2)!
                 month = Int(date[yearIndex..<monthIndex], radix: 2)!
                 day = Int(date[monthIndex..<dayIndex], radix: 2)!
-                print(date[yearIndex..<monthIndex])
-                print(date[monthIndex..<dayIndex])
                 
                 //time
                 var binary3 = String(Int(byteArray[4]),radix: 2)
@@ -279,12 +278,12 @@ extension BloodPressureViewController: CBPeripheralDelegate {
                 binary4 = convertBinary(binary: binary4)
                 
                 let time = String(binary4) + String(binary3)
-                print(time)
+            
                 let startIndex = time.index(time.startIndex, offsetBy: 3)
                 let hourIndex = time.index(time.startIndex, offsetBy: 8)
                 let nextIndex = time.index(time.startIndex, offsetBy: 10)
                 let minuteIndex = time.index(time.startIndex, offsetBy: 16)
-                print(time[startIndex..<hourIndex])
+
                 hour = Int(time[startIndex..<hourIndex], radix: 2)!
                 minute = Int(time[nextIndex..<minuteIndex], radix: 2)!
                 timestampLabel.text = "Timestamp: \(hour):\(minute):\(secund) \(day).\(month).\(year)"
