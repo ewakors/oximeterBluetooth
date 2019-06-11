@@ -123,13 +123,14 @@ extension BloodPressureViewController: CBPeripheralDelegate {
                 let result = 256 - data.checksum
                 print("0x\(String(result, radix: 16))")
                 peripheral.setNotifyValue(true, for: characteristic)
+//                peripheral.writeValue(Data([0x51, 0x25, 0x0, 0x0, 0x0, 0x02, 0xa3,0x1b]), for: characteristic, type: .withResponse)
 
                 peripheral.writeValue(Data([0x51, 0x25, 0x0, 0x02, 0x0, 0x02, 0xa3,0x1d]), for: characteristic, type: .withResponse)
-//                peripheral.writeValue(Data([0x51, 0x26, 0x0, 0x02, 0x0, 0x02, 0xa3,0x1e]), for: characteristic, type: .withResponse)
+                peripheral.writeValue(Data([0x51, 0x26, 0x0, 0x02, 0x0, 0x02, 0xa3,0x1e]), for: characteristic, type: .withResponse)
                 peripheral.setNotifyValue(true, for: characteristic)
-//                peripheral.writeValue(Data([0x51, 0x26, 0x0, 0x01, 0x0, 0x02, 0xa3, 0x1d]), for: characteristic, type: .withResponse)
-//                peripheral.setNotifyValue(true, for: characteristic)
-//                peripheral.writeValue(Data([0x51, 0x26, 0x0, 0x00, 0x0, 0x02, 0xa3,0x1c]), for: characteristic, type: .withResponse)
+                //                peripheral.writeValue(Data([0x51, 0x26, 0x0, 0x01, 0x0, 0x02, 0xa3, 0x1d]), for: characteristic, type: .withResponse)
+                //                peripheral.setNotifyValue(true, for: characteristic)
+                //                peripheral.writeValue(Data([0x51, 0x26, 0x0, 0x00, 0x0, 0x02, 0xa3,0x1c]), for: characteristic, type: .withResponse)
                 //turn off device
                 //                peripheral.writeValue(Data([0x51, 0x50, 0x0, 0x0, 0x0, 0x0, 0xa3, 0x44]), for: characteristic, type: .withResponse)
                 //                peripheral.setNotifyValue(true, for: characteristic)
@@ -195,84 +196,116 @@ extension BloodPressureViewController: CBPeripheralDelegate {
             let byteArray = [UInt8](characteristicData)
             let firstBitValue = byteArray[0] & 0x01
             let secondBitValue = byteArray[1]
+            
+            var sysValue: Float = 0
+            var diaValue: Float = 0
+            var meanValue: Float = 0
+            var pulseValue: Float = 0
+            var hour: Int = 0
+            var minute: Int = 0
+            var secund: Int = 0
+            var day: Int = 0
+            var month: Int = 0
+            var year: Int = 0
+            
             if firstBitValue == 0 {
-                let sysValue = Float(byteArray[1])
-                let diaValue = Float(byteArray[3])
-                let meanValue = Float(byteArray[5])
-                let hour = Int(byteArray[11])
-                let minute = Int(byteArray[12])
-                let secund = Int(byteArray[13])
-                let day = Int(byteArray[10])
-                let mounth = Int(byteArray[9])
+                
+                sysValue = Float(byteArray[1])
+                diaValue = Float(byteArray[3])
+                meanValue = Float(byteArray[5])
+                pulseValue = Float(byteArray[14])
+                hour = Int(byteArray[11])
+                minute = Int(byteArray[12])
+                secund = Int(byteArray[13])
+                day = Int(byteArray[10])
+                month = Int(byteArray[9])
+                
                 var year1 = String(Int(byteArray[7]),radix: 2)
-                if year1.count < 8 {
-                    let count = 8 - year1.count
-                    for _ in 0..<count {
-                        year1 = "0" + year1
-                    }
-                }
+                year1 = convertBinary(binary: year1)
+          
                 var year2 = String(Int(byteArray[8]),radix: 2)
-                if year2.count < 8 {
-                    let count = 8 - year2.count
-                    for _ in 0..<count {
-                        year2 = "0" + year2
-                    }
-                }
-                let year = Int(year2+year1, radix:2)!
-                let pulseValue = Float(byteArray[14])
+                year2 = convertBinary(binary: year2)
+    
+                year = Int(year2+year1, radix:2)!
                 
                 print("Systolic: \(sysValue)")
                 print("Diastolic: \(diaValue)")
                 print("Mean AP: \(meanValue)")
-                print("Timestamp: \(hour):\(minute):\(secund) \(day).\(mounth).\(year)")
+                print("Timestamp: \(hour):\(minute):\(secund) \(day).\(month).\(year)")
                 print("Pulse: \(pulseValue)")
-                systolicLabel.text = "Systolic: \(sysValue) mmHg"
-                diastolicLabel.text = "Diastolic: \(diaValue) mmHg"
-                meanLabel.text = "Mean AP: \(meanValue) mmHg"
-                timestampLabel.text = "Timestamp: \(hour):\(minute):\(secund) \(day).\(mounth).\(year)"
-                pulseLabel.text = "Pulse: \(pulseValue) bpm"
-            } else if secondBitValue == 38 {
+                timestampLabel.text = "Timestamp: \(hour):\(minute):\(secund) \(day).\(month).\(year)"
+            
+            }
+            if secondBitValue == 38 {
                 // result
-                let sysValue = Float(byteArray[2])
-                let diaValue = Float(byteArray[4])
-                let meanValue = Float(byteArray[3])
-                let pulseValue = Float(byteArray[5])
+                 sysValue = Float(byteArray[2])
+                 diaValue = Float(byteArray[4])
+                 meanValue = Float(byteArray[3])
+                 pulseValue = Float(byteArray[5])
                 
                 print("Systolic: \(sysValue)")
                 print("Diastolic: \(diaValue)")
                 print("Mean AP: \(meanValue)")
                 print("Pulse: \(pulseValue)")
-                systolicLabel.text = "Systolic: \(sysValue) mmHg"
-                diastolicLabel.text = "Diastolic: \(diaValue) mmHg"
-                meanLabel.text = "Mean AP: \(meanValue) mmHg"
-                pulseLabel.text = "Pulse: \(pulseValue) bpm"
-            } else if secondBitValue == 37 {
+
+            }
+            if secondBitValue == 37 {
                 //date
                 var binary = String(Int(byteArray[2]),radix: 2)
-                if binary.count < 8 {
-                    let count = 8 - binary.count
-                    for i in 0..<count {
-                        binary = "0" + binary
-                    }
-                }
+                binary = convertBinary(binary: binary)
+
                 var binary2 = String(Int(byteArray[3]),radix: 2)
-                if binary2.count < 8 {
-                    let count = 8 - binary2.count
-                    for i in 0..<count {
-                        binary2 = "0" + binary2
-                    }
-                }
+                binary2 = convertBinary(binary: binary2)
+
                 print("binary \(binary)")
                 print("binary2 \(binary2)")
                 
                 print(binary2 + binary)
-//                let date = String(binary2) + String(binary)
-//                let day: Substring = date[0..<4]
-//                print(day)
-                let decimal = Int(binary2+binary, radix:2)!
-                print(decimal)
+                let date = String(binary2) + String(binary)
+                let yearIndex = date.index(date.startIndex, offsetBy: 7)
+                let dayIndex = date.index(date.startIndex, offsetBy: 16)
+                let monthIndex = date.index(date.startIndex, offsetBy: 11)
+                print(date[date.startIndex..<yearIndex])
+                year = Int(date[date.startIndex..<yearIndex], radix:2)!
+                month = Int(date[yearIndex..<monthIndex], radix: 2)!
+                day = Int(date[monthIndex..<dayIndex], radix: 2)!
+                print(date[yearIndex..<monthIndex])
+                print(date[monthIndex..<dayIndex])
+                
+                //time
+                var binary3 = String(Int(byteArray[4]),radix: 2)
+                binary3 = convertBinary(binary: binary3)
+                var binary4 = String(Int(byteArray[5]),radix: 2)
+                binary4 = convertBinary(binary: binary4)
+                
+                let time = String(binary4) + String(binary3)
+                print(time)
+                let startIndex = time.index(time.startIndex, offsetBy: 3)
+                let hourIndex = time.index(time.startIndex, offsetBy: 8)
+                let nextIndex = time.index(time.startIndex, offsetBy: 10)
+                let minuteIndex = time.index(time.startIndex, offsetBy: 16)
+                print(time[startIndex..<hourIndex])
+                hour = Int(time[startIndex..<hourIndex], radix: 2)!
+                minute = Int(time[nextIndex..<minuteIndex], radix: 2)!
+                timestampLabel.text = "Timestamp: \(hour):\(minute):\(secund) \(day).\(month).\(year)"
+            }
+            
+            systolicLabel.text = "Systolic: \(sysValue) mmHg"
+            diastolicLabel.text = "Diastolic: \(diaValue) mmHg"
+            meanLabel.text = "Mean AP: \(meanValue) mmHg"
+            pulseLabel.text = "Pulse: \(pulseValue) bpm"
+        }
+    }
+    
+    func convertBinary(binary: String) -> String {
+        var binary = binary
+        if binary.count < 8 {
+            let count = 8 - binary.count
+            for _ in 0..<count {
+                binary = "0" + binary
             }
         }
+        return binary
     }
 }
 
