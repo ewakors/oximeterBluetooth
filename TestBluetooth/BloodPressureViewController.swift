@@ -117,35 +117,28 @@ extension BloodPressureViewController: CBPeripheralDelegate {
                 //                peripheral.setNotifyValue(true, for: characteristic)
             }
             if characteristic.uuid == pressureCharacteristicUUID {
-                
-                var timeData = Data([0x51, 0x25, 0x0, 0x01, 0x0, 0x01, 0xa3])
-                var resultData = Data([0x51, 0x26, 0x0, 0x01, 0x0, 0x01, 0xa3])
-                
+                var notifiactionData = Data([0x51, 0x54, 0x0, 0x0, 0x0, 0x0, 0xa3])
+//                user 1 time 2
+//                var timeData = Data([0x51, 0x25, 0x1, 0x0, 0x0, 0x0, 0xa3])
+                var timeData = Data([0x51, 0x25, 0x1, 0x0, 0x0, 0x2, 0xa3])
                 let timeSum = UInt8(timeData.checksum)
                 timeData.append(timeSum)
-                
+                //user 1 result 2
+//                var resultData = Data([0x51, 0x26, 0x1, 0x0, 0x0, 0x0, 0xa3])
+                var resultData = Data([0x51, 0x26, 0x1, 0x0, 0x0, 0x2, 0xa3])
                 let resultSum = UInt8(resultData.checksum)
                 resultData.append(resultSum)
-                
+                //Start a Blood Pressure measurement
+                var startData = Data([0x51, 0x43, 0x0, 0x0, 0x0, 0x0, 0xa3])
+                //turn off the deivce
+                var turnOffData = Data([0x51, 0x50, 0x0, 0x0, 0x0, 0x0, 0xa3])
+
                 peripheral.setNotifyValue(true, for: characteristic)
-//                peripheral.writeValue(Data([0x51, 0x25, 0x0, 0x0, 0x0, 0x02, 0xa3,0x1b]), for: characteristic, type: .withResponse)
+                peripheral.writeValue(notifiactionData, for: characteristic, type: .withResponse)
 
                 peripheral.writeValue(timeData, for: characteristic, type: .withResponse)
                 peripheral.writeValue(resultData, for: characteristic, type: .withResponse)
                 peripheral.setNotifyValue(true, for: characteristic)
-                //                peripheral.writeValue(Data([0x51, 0x26, 0x0, 0x01, 0x0, 0x02, 0xa3, 0x1d]), for: characteristic, type: .withResponse)
-                //                peripheral.setNotifyValue(true, for: characteristic)
-                //                peripheral.writeValue(Data([0x51, 0x26, 0x0, 0x00, 0x0, 0x02, 0xa3,0x1c]), for: characteristic, type: .withResponse)
-                //turn off device
-                //                peripheral.writeValue(Data([0x51, 0x50, 0x0, 0x0, 0x0, 0x0, 0xa3, 0x44]), for: characteristic, type: .withResponse)
-                //                peripheral.setNotifyValue(true, for: characteristic)
-                //                peripheral.writeValue(Data([0x51, 0x25, 0x0, 0x0, 0x0, 0x0, 0xa3,0xe7]), for: characteristic, type: .withResponse)
-                //                peripheral.writeValue(Data([0x51, 0x26, 0x0, 0x0, 0x0, 0x0, 0xa3,0xe6]), for: characteristic, type: .withResponse)
-                //                peripheral.writeValue(Data([0x51, 0x50, 0x0, 0x0, 0x0, 0x0, 0xa3,0xbc]), for: characteristic, type: .withResponse)
-                //                peripheral.writeValue(data, for: characteristic, type: .withResponse)
-                
-                rxCharacteristic =  characteristic
-                print("Rx characteristic: \(characteristic)")
             }
         }
     }
