@@ -14,6 +14,8 @@
 		940C62322285B2E90024D1C5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 940C62312285B2E90024D1C5 /* Assets.xcassets */; };
 		940C62352285B2E90024D1C5 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 940C62332285B2E90024D1C5 /* LaunchScreen.storyboard */; };
 		94126BD5229D4CDD005EB66C /* BloodPressureViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94126BD4229D4CDD005EB66C /* BloodPressureViewController.swift */; };
+		9413D18222B10E53007376F3 /* BloodPressureCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9413D18022B10E53007376F3 /* BloodPressureCell.swift */; };
+		9413D18322B10E53007376F3 /* BloodPressureCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9413D18122B10E53007376F3 /* BloodPressureCell.xib */; };
 		94CFABF92295621F000466F3 /* WeightScaleViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94CFABF82295621F000466F3 /* WeightScaleViewController.swift */; };
 /* End PBXBuildFile section */
 
@@ -27,6 +29,8 @@
 		940C62342285B2E90024D1C5 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		940C62362285B2E90024D1C5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		94126BD4229D4CDD005EB66C /* BloodPressureViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BloodPressureViewController.swift; sourceTree = "<group>"; };
+		9413D18022B10E53007376F3 /* BloodPressureCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BloodPressureCell.swift; sourceTree = "<group>"; };
+		9413D18122B10E53007376F3 /* BloodPressureCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = BloodPressureCell.xib; sourceTree = "<group>"; };
 		94CFABF82295621F000466F3 /* WeightScaleViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeightScaleViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -66,6 +70,8 @@
 				94CFABF82295621F000466F3 /* WeightScaleViewController.swift */,
 				94126BD4229D4CDD005EB66C /* BloodPressureViewController.swift */,
 				940C62362285B2E90024D1C5 /* Info.plist */,
+				9413D18022B10E53007376F3 /* BloodPressureCell.swift */,
+				9413D18122B10E53007376F3 /* BloodPressureCell.xib */,
 			);
 			path = TestBluetooth;
 			sourceTree = "<group>";
@@ -142,6 +148,7 @@
 				940C62352285B2E90024D1C5 /* LaunchScreen.storyboard in Resources */,
 				940C62322285B2E90024D1C5 /* Assets.xcassets in Resources */,
 				940C62302285B2E40024D1C5 /* Main.storyboard in Resources */,
+				9413D18322B10E53007376F3 /* BloodPressureCell.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -155,6 +162,7 @@
 				94057D91228EB92400E1DF7C /* ThermometerViewController.swift in Sources */,
 				94CFABF92295621F000466F3 /* WeightScaleViewController.swift in Sources */,
 				940C622D2285B2E40024D1C5 /* ViewController.swift in Sources */,
+				9413D18222B10E53007376F3 /* BloodPressureCell.swift in Sources */,
 				94126BD5229D4CDD005EB66C /* BloodPressureViewController.swift in Sources */,
 				940C622B2285B2E40024D1C5 /* AppDelegate.swift in Sources */,
 			);

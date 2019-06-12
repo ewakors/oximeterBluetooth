@@ -11,12 +11,12 @@ import CoreBluetooth
 
 class BloodPressureViewController: UIViewController {
     
-    @IBOutlet weak var systolicLabel: UILabel!
-    @IBOutlet weak var diastolicLabel: UILabel!
-    @IBOutlet weak var meanLabel: UILabel!
-    @IBOutlet weak var timestampLabel: UILabel!
-    @IBOutlet weak var pulseLabel: UILabel!
     @IBOutlet weak var userTextField: UITextField!
+    @IBOutlet weak var tableView: UITableView! {
+        didSet {
+            self.tableView.register(UINib(nibName: "BloodPressureCell", bundle: nil), forCellReuseIdentifier: "bloodCell")
+        }
+    }
     
     var pressureServiceId = "00001523-1212-EFDE-1523-785FEABCD123"
     var pressureCharacteriscticId = "00001524-1212-efde-1523-785feabcd123"
@@ -27,23 +27,32 @@ class BloodPressureViewController: UIViewController {
     var rxCharacteristic : CBCharacteristic?
     
     var characteristicASCIIValue = NSString()
+    var sysValue: Int = 0
+    var diaValue: Int = 0
+    var meanValue: Int = 0
+    var pulseValue: Int = 0
+    var hour: Int = 0
+    var minute: Int = 0
+    var secund: Int = 0
+    var day: Int = 0
+    var month: Int = 0
+    var year: Int = 0
     var dataNumber: Int = 0
     var userNumber: Int = 0
     let userPicker = UIPickerView()
     var userData = ["1","2","3","4"]
+    var bloodPressure: [BloodPressure] = [BloodPressure]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         showUserPicker()
+        tableView.dataSource = self
+        tableView.delegate = self
+        tableView.rowHeight = 145.0
     }
     
     override func viewDidDisappear(_ animated: Bool) {
         centralManager = nil
-        systolicLabel.text = "--"
-        diastolicLabel.text = "--"
-        meanLabel.text = "--"
-        timestampLabel.text = "--"
-        pulseLabel.text = "--"
     }
     
     func showUserPicker() {
@@ -75,11 +84,7 @@ class BloodPressureViewController: UIViewController {
     @IBAction func refreshButton(_ sender: Any) {
         centralManager = nil
         centralManager = CBCentralManager(delegate: self, queue: nil)
-        systolicLabel.text = "--"
-        diastolicLabel.text = "--"
-        meanLabel.text = "--"
-        timestampLabel.text = "--"
-        pulseLabel.text = "--"
+        bloodPressure.removeAll()
     }
 }
 extension BloodPressureViewController: CBCentralManagerDelegate {
@@ -218,23 +223,12 @@ extension BloodPressureViewController: CBPeripheralDelegate {
             let firstBitValue = byteArray[0] & 0x01
             let secondBitValue = byteArray[1]
             
-            var sysValue: Float = 0
-            var diaValue: Float = 0
-            var meanValue: Float = 0
-            var pulseValue: Float = 0
-            var hour: Int = 0
-            var minute: Int = 0
-            var secund: Int = 0
-            var day: Int = 0
-            var month: Int = 0
-            var year: Int = 0
-            
             if firstBitValue == 0 {
                 
-                sysValue = Float(byteArray[1])
-                diaValue = Float(byteArray[3])
-                meanValue = Float(byteArray[5])
-                pulseValue = Float(byteArray[14])
+                sysValue = Int(byteArray[1])
+                diaValue = Int(byteArray[3])
+                meanValue = Int(byteArray[5])
+                pulseValue = Int(byteArray[14])
                 hour = Int(byteArray[11])
                 minute = Int(byteArray[12])
                 secund = Int(byteArray[13])
@@ -254,21 +248,22 @@ extension BloodPressureViewController: CBPeripheralDelegate {
                 print("Mean AP: \(meanValue)")
                 print("Timestamp: \(hour):\(minute):\(secund) \(day).\(month).\(year)")
                 print("Pulse: \(pulseValue)")
-                timestampLabel.text = "Timestamp: \(hour):\(minute):\(secund) \(day).\(month).\(year)"
+//                timestampLabel.text = "Timestamp: \(hour):\(minute):\(secund) \(day).\(month).\(year)"
                 
             }
             if secondBitValue == 38 {
                 // result
-                sysValue = Float(byteArray[2])
-                diaValue = Float(byteArray[4])
-                meanValue = Float(byteArray[3])
-                pulseValue = Float(byteArray[5])
+                sysValue = Int(byteArray[2])
+                diaValue = Int(byteArray[4])
+                meanValue = Int(byteArray[3])
+                pulseValue = Int(byteArray[5])
                 
                 print("Systolic: \(sysValue)")
                 print("Diastolic: \(diaValue)")
                 print("Mean AP: \(meanValue)")
                 print("Pulse: \(pulseValue)")
-                
+                bloodPressure.append(BloodPressure(systolic: sysValue, diastolic: diaValue, mean: meanValue, pulse: pulseValue))
+                tableView.reloadData()
             }
             if secondBitValue == 37 {
                 //date
@@ -302,13 +297,13 @@ extension BloodPressureViewController: CBPeripheralDelegate {
                 hour = Int(time[startIndex..<hourIndex], radix: 2)!
                 minute = Int(time[nextIndex..<minuteIndex], radix: 2)!
                 print("Timestamp: \(hour):\(minute):\(secund) \(day).\(month).\(year)")
-                timestampLabel.text = "Timestamp: \(hour):\(minute):\(secund) \(day).\(month).\(year)"
+//                timestampLabel.text = "Timestamp: \(hour):\(minute):\(secund) \(day).\(month).\(year)"
             }
             
-            systolicLabel.text = "Systolic: \(sysValue) mmHg"
-            diastolicLabel.text = "Diastolic: \(diaValue) mmHg"
-            meanLabel.text = "Mean AP: \(meanValue) mmHg"
-            pulseLabel.text = "Pulse: \(pulseValue) bpm"
+//            systolicLabel.text = "Systolic: \(sysValue) mmHg"
+//            diastolicLabel.text = "Diastolic: \(diaValue) mmHg"
+//            meanLabel.text = "Mean AP: \(meanValue) mmHg"
+//            pulseLabel.text = "Pulse: \(pulseValue) bpm"
         }
     }
     
@@ -380,6 +375,21 @@ extension BloodPressureViewController: UIPickerViewDelegate, UIPickerViewDataSou
     }
 }
 
+extension BloodPressureViewController: UITableViewDataSource, UITableViewDelegate {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return dataNumber
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell: BloodPressureCell = tableView.dequeueReusableCell(withIdentifier: "bloodCell", for: indexPath) as! BloodPressureCell
+        
+        if bloodPressure.count == dataNumber {
+            cell.configure(with: bloodPressure,indexRow: indexPath.row)
+        }
+        
+        return cell
+    }
+}
 extension Data {
     var checksum: Int {
         return self.map { Int($0) }.reduce(0, +) &  0xff
