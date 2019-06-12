@@ -61,9 +61,18 @@
                                     </label>
                                 </subviews>
                             </stackView>
+                            <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Select user" textAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Si1-Hl-QIZ">
+                                <rect key="frame" x="50" y="104" width="314" height="30"/>
+                                <nil key="textColor"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits"/>
+                            </textField>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
+                            <constraint firstItem="Si1-Hl-QIZ" firstAttribute="leading" secondItem="3mJ-eL-s7o" secondAttribute="leading" constant="50" id="HHX-uz-Wzb"/>
+                            <constraint firstItem="Si1-Hl-QIZ" firstAttribute="top" secondItem="3mJ-eL-s7o" secondAttribute="top" constant="60" id="IiK-d1-Kko"/>
+                            <constraint firstItem="3mJ-eL-s7o" firstAttribute="trailing" secondItem="Si1-Hl-QIZ" secondAttribute="trailing" constant="50" id="LCi-6Y-OxD"/>
                             <constraint firstItem="3mJ-eL-s7o" firstAttribute="bottom" secondItem="hLL-G9-YP1" secondAttribute="bottom" constant="20" id="cA3-Bg-4pK"/>
                             <constraint firstItem="528-pu-wVs" firstAttribute="centerY" secondItem="IeW-Bv-lVi" secondAttribute="centerY" id="fhf-kz-LDK"/>
                             <constraint firstItem="hLL-G9-YP1" firstAttribute="centerX" secondItem="IeW-Bv-lVi" secondAttribute="centerX" id="jAe-gc-fZi"/>
@@ -78,6 +87,7 @@
                         <outlet property="pulseLabel" destination="Boe-hN-wEq" id="2lA-U2-pRg"/>
                         <outlet property="systolicLabel" destination="uCo-oC-zGP" id="spH-BC-SWX"/>
                         <outlet property="timestampLabel" destination="j28-pj-iMJ" id="74d-Sj-EMz"/>
+                        <outlet property="userTextField" destination="Si1-Hl-QIZ" id="8fy-7U-oan"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="qzc-iB-fQv" userLabel="First Responder" sceneMemberID="firstResponder"/>
